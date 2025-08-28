@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng kí EFT</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      overflow-x: hidden;
+      height: 100vh;
+    }
+
+    /* Background slideshow */
+    .bg-slideshow {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -2;
+      overflow: hidden;
+    }
+    .bg-slideshow img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      top: 0; left: 0;
+      opacity: 0;
+      transition: opacity 3s ease-in-out;
+    }
+    .bg-slideshow img.active {
+      opacity: 1;
+    }
+
+    /* Overlay làm tối */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.70);
+      z-index: -1;
+    }
+
+    /* Nội dung chính */
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .logo {
+      width: 180px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 3rem;
+      background: linear-gradient(90deg, #a855f7, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    p {
+      margin: 10px 0 30px;
+      font-size: 1rem;
+      color: #ddd;
+    }
+
+    /* Glass form với border động */
+    .form-box {
+      position: relative;
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: 360px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 2px solid transparent;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .form-box:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 0 35px rgba(147,51,234,0.3);
+    }
+    .form-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      padding: 2px;
+      background: linear-gradient(270deg, #9333ea, #3b82f6, #60a5fa, #a855f7);
+      background-size: 600% 600%;
+      animation: borderAnim 8s ease infinite;
+      -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+    }
+    @keyframes borderAnim {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .form-box form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .form-box input,
+    .form-box button {
+      width: 100%;
+      padding: 14px 16px;
+      margin: 10px 0;
+      border-radius: 12px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    /* Input xịn sò */
+    .form-box input {
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+      backdrop-filter: blur(6px);
+      transition: all 0.4s ease;
+    }
+    .form-box input::placeholder {
+      color: #ccc;
+    }
+    .form-box input:focus {
+      outline: none;
+      border-image: linear-gradient(90deg, #9333ea, #3b82f6) 1;
+      box-shadow: 0 0 12px rgba(147,51,234,0.7);
+      animation: glow 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 8px rgba(147,51,234,0.5); }
+      to   { box-shadow: 0 0 16px rgba(59,130,246,0.8); }
+    }
+
+    /* Button chuyên nghiệp */
+    .form-box button {
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(90deg, #9333ea, #3b82f6);
+      color: white;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+      text-align: center;
+      animation: pulse 2.5s infinite;
+    }
+    .form-box button:hover {
+      opacity: 0.95;
+      transform: scale(1.05);
+      box-shadow: 0 6px 25px rgba(147,51,234,0.7);
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 10px rgba(59,130,246,0.4); }
+      50%  { box-shadow: 0 0 20px rgba(147,51,234,0.6); }
+      100% { box-shadow: 0 0 10px rgba(59,130,246,0.4); }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("zP8SC3aIHGHBdD8Cm"); // ✅ Public Key
+    })();
+
+    function sendMail(event) {
+      event.preventDefault();
+      emailjs.sendForm(
+        "service_kroqbtb",   // ✅ Service ID
+        "template_o8a0apg",  // ✅ Template ID
+        "#registerForm"
+      ).then(
+        function() { alert("✅ Gửi thành công!"); },
+        function(error) { alert("❌ Lỗi: " + JSON.stringify(error)); }
+      );
+    }
+
+    let current = 0;
+    function changeSlide() {
+      const slides = document.querySelectorAll(".bg-slideshow img");
+      slides[current].classList.remove("active");
+      current = (current + 1) % slides.length;
+      slides[current].classList.add("active");
+    }
+    window.onload = () => {
+      setInterval(changeSlide, 8000); // đổi ảnh mỗi 8s
+    };
+  </script>
+</head>
+<body>
+  <!-- ảnh background -->
+  <div class="bg-slideshow">
+    <img src="nhom3.jpg" class="active">
+    <img src="nhom2.jpg">
+    <img src="nhom1.jpg">
+    <img src="nhom4.jpg">
+    <img src="nhom5.jpg">
+  </div>
+  <div class="overlay"></div>
+
+  <!-- nội dung -->
+  <div class="container">
+    <img src="llogo.png" alt="EFT Logo" class="logo">
+    <h1>Eternal Flame Tech</h1>
+    <p>from Nguyen Thi Minh Khai highschool the gifted</p>
+    <div class="form-box">
+      <form id="registerForm" onsubmit="sendMail(event)">
+        <input type="text" name="name" placeholder="Họ Tên" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="class" placeholder="Lớp (Ví dụ: 10a1, 12a6,...)" required>
+        <button type="submit">⋆˙⟡ Gửi đây nò ⋆˙⟡</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
